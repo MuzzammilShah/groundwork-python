@@ -27,7 +27,8 @@ import csv
 
 def portfolio_dict(filename):
 
-    portfolio = {}
+    # portfolio = {}
+    portfolio = []
 
     with open(filename, 'rt') as f:
 
@@ -39,17 +40,37 @@ def portfolio_dict(filename):
         #         'shares': row[1],
         #         'price': row[2]
         #     }
+        # for row in rows:
+        #     portfolio[row[0]] = {
+        #         'shares': int(row[1]),
+        #         'price': float(row[2])
+        #     }
+        # for row in rows:
+        #     stock = {
+        #         'name': row[0],
+        #         'shares': int(row[1]),
+        #         'prices': float(row[2])
+        #     }
+        #     portfolio.append(stock)
         for row in rows:
-            portfolio[row[0]] = {
-                'shares': int(row[1]),
-                'price': float(row[2])
-            }
+            stock = (
+                row[0],
+                int(row[1]),
+                float(row[2])
+            )
+            portfolio.append(stock)
 
     return portfolio
 
 def main():
     listp = portfolio_dict('Data/portfolio.csv')
-    print(listp)
+    # print(listp)
+    headers = ('Name', 'Shares', 'Price')
+    print('%10s %10s %10s' % headers)
+    print(('-' * 10 + ' ') * len(headers))
+    for row in listp:
+        # print('%10s %10d %10.2f %10.2f' % row)
+        print(f'{row[0]:>10s} {row[1]:10d} ${row[2]:>10.2f}')
 
 if __name__ == '__main__':
     main ()
