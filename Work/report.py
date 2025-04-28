@@ -1,76 +1,64 @@
 # report.py
-#
-# Exercise 2.4
 
-import csv
+import fileparse
 
-# def portfolio_list(filename):
+def read_portfolio(filename):
+    '''
+    Read a stock portfolio file into a list of dictionaries with keys
+    name, shares, and price.
+    '''
+    with open(filename) as lines:
+        return fileparse.parse_csv(lines, select=['name','shares','price'], types=[str,int,float])
 
-#     portfolio = []
+def read_prices(filename):
+    '''
+    Read a CSV file of price data into a dict mapping names to prices.
+    '''
+    with open(filename) as lines:
+        return dict(fileparse.parse_csv(lines, types=[str,float], has_headers=False))
 
-#     with open(filename, 'rt') as f:
+def make_report_data(portfolio,prices):
+    '''
+    Make a list of (name, shares, price, change) tuples given a portfolio list
+    and prices dictionary.
+    '''
+    rows = []
+    for stock in portfolio:
+        current_price = prices[stock['name']]
+        change = current_price - stock['price']
+        summary = (stock['name'], stock['shares'], current_price, change)
+        rows.append(summary)
+    return rows
 
-#         rows = csv.reader(f)
-#         headers = next(rows)
-#         for row in rows:
-#             portfolio.append((row[0], int(row[1]), float(row[2])))
+def print_report(reportdata):
+    '''
+    Print a nicely formated table from a list of (name, shares, price, change) tuples.
+    '''
+    headers = ('Name','Shares','Price','Change')
+    print('%10s %10s %10s %10s' % headers)
+    print(('-'*10 + ' ')*len(headers))
+    for row in reportdata:
+        print('%10s %10d %10.2f %10.2f' % row)
 
-#     return portfolio
+def portfolio_report(portfoliofile, pricefile):        
+    '''
+    Make a stock report given portfolio and price data files.
+    '''
+    # Read data files 
+    portfolio = read_portfolio(portfoliofile)
+    prices = read_prices(pricefile)
 
-# def main():
-#     listp = portfolio_list('Data/portfolio.csv')
-#     for item in listp:
-#         print(item)
+    # Create the report data
+    report = make_report_data(portfolio, prices)
 
-# if __name__ == '__main__':
-#     main ()
+    # Print it out
+    print_report(report)
 
-def portfolio_dict(filename):
-
-    # portfolio = {}
-    portfolio = []
-
-    with open(filename, 'rt') as f:
-
-        rows = csv.reader(f)
-        headers = next(rows)
-        # for i, row in enumerate(rows):
-        #     portfolio[i] = {
-        #         'name': row[0],
-        #         'shares': row[1],
-        #         'price': row[2]
-        #     }
-        # for row in rows:
-        #     portfolio[row[0]] = {
-        #         'shares': int(row[1]),
-        #         'price': float(row[2])
-        #     }
-        # for row in rows:
-        #     stock = {
-        #         'name': row[0],
-        #         'shares': int(row[1]),
-        #         'prices': float(row[2])
-        #     }
-        #     portfolio.append(stock)
-        for row in rows:
-            stock = (
-                row[0],
-                int(row[1]),
-                float(row[2])
-            )
-            portfolio.append(stock)
-
-    return portfolio
-
-def main():
-    listp = portfolio_dict('Data/portfolio.csv')
-    # print(listp)
-    headers = ('Name', 'Shares', 'Price')
-    print('%10s %10s %10s' % headers)
-    print(('-' * 10 + ' ') * len(headers))
-    for row in listp:
-        # print('%10s %10d %10.2f %10.2f' % row)
-        print(f'{row[0]:>10s} {row[1]:10d} ${row[2]:>10.2f}')
+def main(args):
+    if len(args) != 3:
+        raise SystemExit('Usage: %s portfile pricefile' % args[0])
+    portfolio_report(args[1], args[2])
 
 if __name__ == '__main__':
-    main ()
+    import sys
+    main(sys.argv)
